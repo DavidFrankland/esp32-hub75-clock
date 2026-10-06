@@ -62,7 +62,7 @@ const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 3600;
 
 // serial debug port baud rate
-const unsigned int BAUD_RATE = 115200; 
+const unsigned int BAUD_RATE = 115200;
 
 void setup()
 {
@@ -109,29 +109,45 @@ void loop()
   matrix->clearScreen();
   clockFaceOuter();
   clockFaceTicks();
-  const uint16_t innerRadius = 0;
-  const uint16_t outerRadius = 28;
 
-  // day of week
-  // date
-  // month
+  // day of week text
+  char buf[20];
+  strftime(buf, 20, "%A", &timeinfo);
+  centreText(buf, centreY - 8, blue);
 
+  // month text
+  strftime(buf, 20, "%B", &timeinfo);
+  centreText(buf, centreY + 10, blue);
+
+  // date text
+  strftime(buf, 20, "%d", &timeinfo);
+  centreText(buf, centreY + 19, blue);
+
+  // hands
   uint8_t hour = timeinfo.tm_hour % 12;
   uint8_t min = timeinfo.tm_min;
   uint8_t sec = timeinfo.tm_sec;
-
-  // hour hand
   clockHand(0, 16, (hour + min / 60.0) / 12.0, red);
-
-  // minute hand
   clockHand(0, 28, (min + sec / 60.0) / 60.0, red);
-
-  // second hand
   clockHand(0, 28, sec / 60.0, green);
 
+  // centre circle
   clockFaceInner();
+
   matrix->flipDMABuffer();
   delay(10);
+}
+
+void centreText(char *myText, uint8_t y, uint16_t colour)
+{
+  int16_t x1;
+  int16_t y1;
+  uint16_t w;
+  uint16_t h;
+  matrix->getTextBounds(myText, 0, 0, &x1, &y1, &w, &h);
+  matrix->setCursor(32 - w / 2, y - h / 2);
+  matrix->setTextColor(colour);
+  matrix->print(myText);
 }
 
 void setTime()
@@ -180,10 +196,9 @@ void printLocalTime()
     matrix->setTextColor(red, black);
     matrix->println("Time fail");
     matrix->setCursor(x, y);
-    delay(500);
+    delay(1000);
     matrix->println("         ");
     matrix->setCursor(x, y);
-    delay(500);
   }
   matrix->setTextColor(green);
   matrix->println("Success");
@@ -207,13 +222,9 @@ void printLocalTime()
   Serial.println(&timeinfo, "%S");
 
   Serial.println("Time variables");
-  char timeHour[3];
-  strftime(timeHour, 3, "%H", &timeinfo);
-  Serial.println(timeHour);
-  char timeWeekDay[10];
-  strftime(timeWeekDay, 10, "%A", &timeinfo);
-  Serial.println(timeWeekDay);
-  Serial.println();
+  char myString[50];
+  strftime(myString, 50, "%d %b", &timeinfo);
+  Serial.println(myString);
 }
 
 void clockFaceOuter()
