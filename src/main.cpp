@@ -110,17 +110,20 @@ void loop()
   clockFaceOuter();
   clockFaceTicks();
 
+  // buffer for day, date, month strings
+  const uint8_t bufSize = 20;
+  char buf[bufSize];
+
   // day of week text
-  char buf[20];
-  strftime(buf, 20, "%A", &timeinfo);
+  strftime(buf, bufSize, "%A", &timeinfo);
   centreText(buf, centreY - 8, blue);
 
-  // month text
-  strftime(buf, 20, "%B", &timeinfo);
+  // month name text
+  strftime(buf, bufSize, "%B", &timeinfo);
   centreText(buf, centreY + 10, blue);
 
-  // date text
-  strftime(buf, 20, "%d", &timeinfo);
+  // date number text
+  snprintf(buf, bufSize, "%d", timeinfo.tm_mday);
   centreText(buf, centreY + 19, blue);
 
   // hands
