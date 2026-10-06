@@ -127,9 +127,9 @@ void loop()
   uint8_t hour = timeinfo.tm_hour % 12;
   uint8_t min = timeinfo.tm_min;
   uint8_t sec = timeinfo.tm_sec;
-  clockHand(0, 16, (hour + min / 60.0) / 12.0, red);
-  clockHand(0, 28, (min + sec / 60.0) / 60.0, red);
   clockHand(0, 28, sec / 60.0, green);
+  clockHand(0, 28, (min + sec / 60.0) / 60.0, red);
+  clockHand(0, 16, (hour + min / 60.0) / 12.0, red);
 
   // centre circle
   clockFaceInner();
