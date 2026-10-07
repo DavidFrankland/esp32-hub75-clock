@@ -114,6 +114,10 @@ void loop()
   const uint8_t bufSize = 20;
   char buf[bufSize];
 
+  // digital time display
+  strftime(buf, bufSize, "%H:%M", &timeinfo);
+  centreText(buf, centreY - 17, yellow);
+
   // day of week text
   strftime(buf, bufSize, "%A", &timeinfo);
   centreText(buf, centreY - 8, blue);
