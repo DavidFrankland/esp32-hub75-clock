@@ -124,6 +124,7 @@ void loop()
 
   // date number text
   snprintf(buf, bufSize, "%d", timeinfo.tm_mday);
+  zeroToO(buf);
   centreText(buf, centreY + 19, blue);
 
   // hands
@@ -136,6 +137,7 @@ void loop()
 
   // digital time display
   strftime(buf, bufSize, "%H:%M", &timeinfo);
+  zeroToO(buf);
   centreText(buf, centreY - 17, yellow);
 
   // centre circle
@@ -145,16 +147,16 @@ void loop()
   delay(10);
 }
 
-void centreText(char *myText, uint8_t y, uint16_t colour)
+void centreText(char *string, uint8_t y, uint16_t colour)
 {
   int16_t x1;
   int16_t y1;
   uint16_t w;
   uint16_t h;
-  matrix->getTextBounds(myText, 0, 0, &x1, &y1, &w, &h);
+  matrix->getTextBounds(string, 0, 0, &x1, &y1, &w, &h);
   matrix->setCursor(32 - w / 2, y - h / 2);
   matrix->setTextColor(colour);
-  matrix->print(myText);
+  matrix->print(string);
 }
 
 void setTime()
@@ -263,4 +265,15 @@ void clockHand(uint16_t innerRadius, uint16_t outerRadius, float angle, uint16_t
   uint16_t x2 = centreX + outerRadius * sin_theta + 0.5;
   uint16_t y2 = centreY - outerRadius * cos_theta + 0.5;
   matrix->drawLine(x1, y1, x2, y2, colour);
+}
+
+void zeroToO(char *string)
+{
+  for (char *c = string; *c; c++)
+  {
+    if (*c == '0')
+    {
+      *c = 'O';
+    }
+  }
 }
