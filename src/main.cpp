@@ -44,19 +44,19 @@
 #define PANE_HEIGHT PANEL_HEIGHT
 #define NUM_LEDS PANE_WIDTH *PANE_HEIGHT
 
-MatrixPanel_I2S_DMA *matrix = nullptr;
+MatrixPanel_I2S_DMA matrix;
 
 const uint16_t centreX = PANE_WIDTH / 2 - 1;
 const uint16_t centreY = PANE_HEIGHT / 2 - 1;
 
-const uint16_t black = matrix->color565(0, 0, 0);
-const uint16_t red = matrix->color565(255, 0, 0);
-const uint16_t green = matrix->color565(0, 255, 0);
-const uint16_t yellow = matrix->color565(255, 255, 0);
-const uint16_t blue = matrix->color565(0, 0, 255);
-const uint16_t magenta = matrix->color565(255, 0, 255);
-const uint16_t cyan = matrix->color565(0, 255, 255);
-const uint16_t white = matrix->color565(255, 255, 255);
+const uint16_t black = matrix.color565(0, 0, 0);
+const uint16_t red = matrix.color565(255, 0, 0);
+const uint16_t green = matrix.color565(0, 255, 0);
+const uint16_t yellow = matrix.color565(255, 255, 0);
+const uint16_t blue = matrix.color565(0, 0, 255);
+const uint16_t magenta = matrix.color565(255, 0, 255);
+const uint16_t cyan = matrix.color565(0, 255, 255);
+const uint16_t white = matrix.color565(255, 255, 255);
 
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
@@ -88,9 +88,9 @@ void setup()
 
   // use a single buffer for startup messages
   mxconfig.double_buff = false;
-  matrix = new MatrixPanel_I2S_DMA(mxconfig);
-  matrix->begin();
-  matrix->setBrightness8(100);
+  matrix = MatrixPanel_I2S_DMA(mxconfig);
+  matrix.begin();
+  matrix.setBrightness8(100);
 
   // set the time using NTP
   setTime();
@@ -103,9 +103,9 @@ void setup()
 
   // use a double buffer for clock display
   mxconfig.double_buff = true;
-  matrix = new MatrixPanel_I2S_DMA(mxconfig);
-  matrix->begin();
-  matrix->setBrightness8(100);
+  matrix = MatrixPanel_I2S_DMA(mxconfig);
+  matrix.begin();
+  matrix.setBrightness8(100);
 }
 
 void loop()
@@ -126,10 +126,10 @@ void loop()
     }
   }
 
-  matrix->clearScreen();
+  matrix.clearScreen();
 
-  // displayh MQTT loop state
-  matrix->writePixel(63, 0, mqtt_client.loop() ? green : red);
+  // display MQTT loop state
+  matrix.writePixel(63, 0, mqtt_client.loop() ? green : red);
 
   // get time
   struct tm timeinfo;
@@ -178,22 +178,22 @@ void loop()
   clockFaceInner();
 
   // display MQTT connection state
-  matrix->writePixel(0, 0, mqtt_client.connected() ? green : red);
+  matrix.writePixel(0, 0, mqtt_client.connected() ? green : red);
 
-  matrix->flipDMABuffer();
+  matrix.flipDMABuffer();
   delay(10);
 }
 
 void initMqtt()
 {
-  matrix->setTextColor(white);
-  matrix->println("MQTT");
+  matrix.setTextColor(white);
+  matrix.println("MQTT");
 
   mqtt_client.setServer(mqtt_broker, mqtt_port);
   mqtt_client.setCallback(mqttCallback);
 
-  int16_t x = matrix->getCursorX();
-  int16_t y = matrix->getCursorY();
+  int16_t x = matrix.getCursorX();
+  int16_t y = matrix.getCursorY();
   while (!mqtt_client.connected())
   {
     Serial.printf("Client %s connecting to the MQTT broker\n", mqtt_client_id);
@@ -205,16 +205,16 @@ void initMqtt()
     {
       Serial.print("Failed with state ");
       Serial.println(mqtt_client.state());
-      matrix->setTextColor(red, black);
-      matrix->println("Fail");
-      matrix->setCursor(x, y);
+      matrix.setTextColor(red, black);
+      matrix.println("Fail");
+      matrix.setCursor(x, y);
       delay(1000);
-      matrix->println("    ");
-      matrix->setCursor(x, y);
+      matrix.println("    ");
+      matrix.setCursor(x, y);
     }
   }
-  matrix->setTextColor(green);
-  matrix->println("Success");
+  matrix.setTextColor(green);
+  matrix.println("Success");
 
   mqtt_client.subscribe(mqtt_topic);
 }
@@ -233,11 +233,11 @@ void mqttCallback(char *topic, byte *payload, unsigned int length)
   }
   Serial.println();
   Serial.println("-----------------------");
-  matrix->clearScreen();
-  matrix->setCursor(0, 0);
-  matrix->setTextColor(magenta);
-  matrix->println(message);
-  matrix->flipDMABuffer();
+  matrix.clearScreen();
+  matrix.setCursor(0, 0);
+  matrix.setTextColor(magenta);
+  matrix.println(message);
+  matrix.flipDMABuffer();
   delay(5000);
 }
 
@@ -247,38 +247,38 @@ void centreText(char *string, uint8_t y, uint16_t colour)
   int16_t y1;
   uint16_t w;
   uint16_t h;
-  matrix->getTextBounds(string, 0, 0, &x1, &y1, &w, &h);
-  matrix->setCursor(32 - w / 2, y - h / 2);
-  matrix->setTextColor(colour);
-  matrix->print(string);
+  matrix.getTextBounds(string, 0, 0, &x1, &y1, &w, &h);
+  matrix.setCursor(32 - w / 2, y - h / 2);
+  matrix.setTextColor(colour);
+  matrix.print(string);
 }
 
 void setTime()
 {
-  matrix->setTextColor(white);
-  matrix->println("Connecting");
-  matrix->setTextColor(yellow);
-  matrix->println(WIFI_SSID);
+  matrix.setTextColor(white);
+  matrix.println("Connecting");
+  matrix.setTextColor(yellow);
+  matrix.println(WIFI_SSID);
   const char *spinnerChars = "|/-\\";
   uint8_t spinnerCharsLen = strlen(spinnerChars);
   uint8_t i = 0;
-  int16_t x = matrix->getCursorX();
-  int16_t y = matrix->getCursorY();
+  int16_t x = matrix.getCursorX();
+  int16_t y = matrix.getCursorY();
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-  matrix->setTextColor(white, black);
+  matrix.setTextColor(white, black);
   while (WiFi.status() != WL_CONNECTED)
   {
-    matrix->print(spinnerChars[i]);
-    matrix->setCursor(x, y);
+    matrix.print(spinnerChars[i]);
+    matrix.setCursor(x, y);
     i = (i + 1) % spinnerCharsLen;
     delay(250);
   }
-  matrix->setTextColor(green, black);
-  matrix->println("Connected");
+  matrix.setTextColor(green, black);
+  matrix.println("Connected");
 
   // init and get the time
-  matrix->setTextColor(white);
-  matrix->println("NTP");
+  matrix.setTextColor(white);
+  matrix.println("NTP");
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
 
   // this is necessary, for some reason
@@ -292,19 +292,19 @@ void setTime()
 void printLocalTime()
 {
   struct tm timeinfo;
-  int16_t x = matrix->getCursorX();
-  int16_t y = matrix->getCursorY();
+  int16_t x = matrix.getCursorX();
+  int16_t y = matrix.getCursorY();
   while (!getLocalTime(&timeinfo))
   {
-    matrix->setTextColor(red, black);
-    matrix->println("Time fail");
-    matrix->setCursor(x, y);
+    matrix.setTextColor(red, black);
+    matrix.println("Time fail");
+    matrix.setCursor(x, y);
     delay(1000);
-    matrix->println("         ");
-    matrix->setCursor(x, y);
+    matrix.println("         ");
+    matrix.setCursor(x, y);
   }
-  matrix->setTextColor(green);
-  matrix->println("Success");
+  matrix.setTextColor(green);
+  matrix.println("Success");
 
   Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
   Serial.print("Day of week: ");
@@ -332,13 +332,13 @@ void printLocalTime()
 
 void clockFaceOuter()
 {
-  matrix->fillCircle(centreX, centreY, 31, white);
-  matrix->fillCircle(centreX, centreY, 29, black);
+  matrix.fillCircle(centreX, centreY, 31, white);
+  matrix.fillCircle(centreX, centreY, 29, black);
 }
 
 void clockFaceInner()
 {
-  matrix->fillCircle(centreX, centreY, 2, white);
+  matrix.fillCircle(centreX, centreY, 2, white);
 }
 
 void clockFaceTicks()
@@ -358,7 +358,7 @@ void clockHand(uint16_t innerRadius, uint16_t outerRadius, float angle, uint16_t
   uint16_t y1 = centreY - innerRadius * cos_theta + 0.5;
   uint16_t x2 = centreX + outerRadius * sin_theta + 0.5;
   uint16_t y2 = centreY - outerRadius * cos_theta + 0.5;
-  matrix->drawLine(x1, y1, x2, y2, colour);
+  matrix.drawLine(x1, y1, x2, y2, colour);
 }
 
 void zeroToO(char *string)
