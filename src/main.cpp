@@ -3,6 +3,7 @@
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <time.h>
 #include <WiFi.h>
+#include <PubSubClient.h>
 
 #include "main.h"
 #include "wifi-credentials.h"
@@ -61,6 +62,16 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 3600;
 
+// MQTT Broker
+const char *mqtt_broker = "10.1.0.100";
+const char *mqtt_topic = "hub75-clock/message";
+const char *mqtt_client_id = "hub75-clock";
+const char *mqtt_username = "";
+const char *mqtt_password = "";
+const uint16_t mqtt_port = 1883;
+WiFiClient espClient;
+PubSubClient mqtt_client(espClient);
+
 // serial debug port baud rate
 const unsigned int BAUD_RATE = 115200;
 
@@ -84,6 +95,9 @@ void setup()
   // set the time using NTP
   setTime();
 
+  // setup MQTT subscription
+  initMqtt();
+
   // wait so we can read the startup messages
   delay(1000);
 
@@ -96,6 +110,27 @@ void setup()
 
 void loop()
 {
+  // check if MQTT still connected
+  while (!mqtt_client.connected())
+  {
+    Serial.printf("Client %s connecting to the MQTT broker\n", mqtt_client_id);
+    if (mqtt_client.connect(mqtt_client_id, mqtt_username, mqtt_password))
+    {
+      Serial.println("MQTT broker connected");
+    }
+    else
+    {
+      Serial.print("Failed with state ");
+      Serial.println(mqtt_client.state());
+      delay(100);
+    }
+  }
+
+  matrix->clearScreen();
+
+  // displayh MQTT loop state
+  matrix->writePixel(63, 0, mqtt_client.loop() ? green : red);
+
   // get time
   struct tm timeinfo;
   if (!getLocalTime(&timeinfo))
@@ -106,7 +141,6 @@ void loop()
   }
 
   // draw time
-  matrix->clearScreen();
   clockFaceOuter();
   clockFaceTicks();
 
@@ -143,8 +177,68 @@ void loop()
   // centre circle
   clockFaceInner();
 
+  // display MQTT connection state
+  matrix->writePixel(0, 0, mqtt_client.connected() ? green : red);
+
   matrix->flipDMABuffer();
   delay(10);
+}
+
+void initMqtt()
+{
+  matrix->setTextColor(white);
+  matrix->println("MQTT");
+
+  mqtt_client.setServer(mqtt_broker, mqtt_port);
+  mqtt_client.setCallback(mqttCallback);
+
+  int16_t x = matrix->getCursorX();
+  int16_t y = matrix->getCursorY();
+  while (!mqtt_client.connected())
+  {
+    Serial.printf("Client %s connecting to the MQTT broker\n", mqtt_client_id);
+    if (mqtt_client.connect(mqtt_client_id, mqtt_username, mqtt_password))
+    {
+      Serial.println("MQTT broker connected");
+    }
+    else
+    {
+      Serial.print("Failed with state ");
+      Serial.println(mqtt_client.state());
+      matrix->setTextColor(red, black);
+      matrix->println("Fail");
+      matrix->setCursor(x, y);
+      delay(1000);
+      matrix->println("    ");
+      matrix->setCursor(x, y);
+    }
+  }
+  matrix->setTextColor(green);
+  matrix->println("Success");
+
+  mqtt_client.subscribe(mqtt_topic);
+}
+
+void mqttCallback(char *topic, byte *payload, unsigned int length)
+{
+  Serial.print("Message arrived in topic: ");
+  Serial.println(topic);
+  String message = String();
+  Serial.print("Message:");
+  for (int i = 0; i < length; i++)
+  {
+    char c = payload[i];
+    Serial.print(c);
+    message += c;
+  }
+  Serial.println();
+  Serial.println("-----------------------");
+  matrix->clearScreen();
+  matrix->setCursor(0, 0);
+  matrix->setTextColor(magenta);
+  matrix->println(message);
+  matrix->flipDMABuffer();
+  delay(5000);
 }
 
 void centreText(char *string, uint8_t y, uint16_t colour)
@@ -191,8 +285,8 @@ void setTime()
   printLocalTime();
 
   // disconnect WiFi as it's no longer needed
-  WiFi.disconnect(true);
-  WiFi.mode(WIFI_OFF);
+  // WiFi.disconnect(true);
+  // WiFi.mode(WIFI_OFF);
 }
 
 void printLocalTime()
