@@ -62,13 +62,6 @@ const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 0;
 const int daylightOffset_sec = 3600;
 
-// MQTT Broker
-const char *mqtt_broker = "10.1.0.100";
-const char *mqtt_topic = "hub75-clock/message";
-const char *mqtt_client_id = "hub75-clock";
-const char *mqtt_username = "";
-const char *mqtt_password = "";
-const uint16_t mqtt_port = 1883;
 WiFiClient espClient;
 PubSubClient mqtt_client(espClient);
 
@@ -113,8 +106,8 @@ void loop()
   // check if MQTT still connected
   while (!mqtt_client.connected())
   {
-    Serial.printf("Client %s connecting to the MQTT broker\n", mqtt_client_id);
-    if (mqtt_client.connect(mqtt_client_id, mqtt_username, mqtt_password))
+    Serial.printf("Client %s connecting to the MQTT broker\n", MQTT_CLIENT_ID);
+    if (mqtt_client.connect(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD))
     {
       Serial.println("MQTT broker connected");
     }
@@ -189,15 +182,15 @@ void initMqtt()
   matrix.setTextColor(white);
   matrix.println("MQTT");
 
-  mqtt_client.setServer(mqtt_broker, mqtt_port);
+  mqtt_client.setServer(MQTT_BROKER, MQTT_PORT);
   mqtt_client.setCallback(mqttCallback);
 
   int16_t x = matrix.getCursorX();
   int16_t y = matrix.getCursorY();
   while (!mqtt_client.connected())
   {
-    Serial.printf("Client %s connecting to the MQTT broker\n", mqtt_client_id);
-    if (mqtt_client.connect(mqtt_client_id, mqtt_username, mqtt_password))
+    Serial.printf("Client %s connecting to the MQTT broker\n", MQTT_CLIENT_ID);
+    if (mqtt_client.connect(MQTT_CLIENT_ID, MQTT_USERNAME, MQTT_PASSWORD))
     {
       Serial.println("MQTT broker connected");
     }
@@ -216,7 +209,7 @@ void initMqtt()
   matrix.setTextColor(green);
   matrix.println("Success");
 
-  mqtt_client.subscribe(mqtt_topic);
+  mqtt_client.subscribe(MQTT_TOPIC);
 }
 
 void mqttCallback(char *topic, byte *payload, unsigned int length)
