@@ -40,8 +40,8 @@ The project uses [PlatformIO](https://platformio.org/). I use Visual Studio Code
 - Clone the Git repository (or download as a zip and unzip)
 - Open the folder in VS Code, it should be recognised as a PlatformIO project
 - Amend [platformio.ini](platformio.ini) if required
-- Copy/paste [wifi-credentials.example.h](src/wifi-credentials.example.h) and save it as [wifi-credentials.h](src/wifi-credentials.h)
-- Amend [wifi-credentials.h](src/wifi-credentials.h) with your wifi SSID and password
+- Copy/paste [config.example.h](src/config.example.h) and save it as [config.h](src/config.h)
+- Amend [config.h](src/config.h) with your wifi SSID and password
 - Build the project: click ![PlatformIO: Build](img/build.png) on the toolbar or `Ctrl` + `Alt` + `B`
 
 The first build will take a couple of minutes as all the required libraries are downloaded and compiled. Subsequent builds will only take a few seconds.

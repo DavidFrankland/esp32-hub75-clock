@@ -5,7 +5,7 @@
 #include <WiFi.h>
 
 #include "main.h"
-#include "wifi-credentials.h"
+#include "config.h"
 
 // HUB75E pinout
 // R1 | G1
