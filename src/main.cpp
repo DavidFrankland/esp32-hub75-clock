@@ -272,10 +272,6 @@ void setTime()
 
   // verify our localtime
   printLocalTime();
-
-  // disconnect WiFi as it's no longer needed
-  // WiFi.disconnect(true);
-  // WiFi.mode(WIFI_OFF);
 }
 
 void printLocalTime()
