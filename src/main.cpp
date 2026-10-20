@@ -57,10 +57,6 @@ const uint16_t magenta = matrix.color565(255, 0, 255);
 const uint16_t cyan = matrix.color565(0, 255, 255);
 const uint16_t white = matrix.color565(255, 255, 255);
 
-const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 0;
-const int daylightOffset_sec = 3600;
-
 // serial debug port baud rate
 const unsigned int BAUD_RATE = 115200;
 
@@ -185,9 +181,9 @@ void setTime()
   // init and get the time
   matrix.setTextColor(white);
   matrix.println("NTP");
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  configTzTime(TIME_ZONE, TIME_NTP_SERVER);
 
-  // this is necessary, for some reason
+  // verify our localtime
   printLocalTime();
 
   // disconnect WiFi as it's no longer needed

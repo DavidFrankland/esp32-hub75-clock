@@ -41,7 +41,7 @@ The project uses [PlatformIO](https://platformio.org/). I use Visual Studio Code
 - Open the folder in VS Code, it should be recognised as a PlatformIO project
 - Amend [platformio.ini](platformio.ini) if required
 - Copy/paste [config.example.h](src/config.example.h) and save it as [config.h](src/config.h)
-- Amend [config.h](src/config.h) with your wifi SSID and password
+- Amend [config.h](src/config.h) with your settings
 - Build the project: click ![PlatformIO: Build](img/build.png) on the toolbar or `Ctrl` + `Alt` + `B`
 
 The first build will take a couple of minutes as all the required libraries are downloaded and compiled. Subsequent builds will only take a few seconds.
