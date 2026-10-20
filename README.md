@@ -1,5 +1,13 @@
 # Analog clock on a 64x64 HUB75 LED panel
 
+Displays an analog clock face on a 64x64 LED panel.
+
+Displays the HH:MM digital time, day name, month name and date.
+
+Connects to wi-fi and gets the time using NTP.
+
+Uses POSIX timezones for local time and daylight saving.
+
 ## How to setup
 
 ### Hardware
